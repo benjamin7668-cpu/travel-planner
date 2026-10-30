@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>여행 플래너</title>
+    <meta name="description" content="여행지만 입력하면 AI가 날짜별 여행 일정을 짜주는 웹사이트" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./">
+        <span class="brand-mark" aria-hidden="true">✈</span>
+        여행 플래너
+      </a>
+      <button type="button" class="ghost-btn" id="settings-btn">⚙ API 설정</button>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow">AI Travel Planner</p>
+        <h1>어디로 떠나세요?</h1>
+        <p class="lead">여행지만 입력하면 날짜별 동선, 맛집, 예산까지 일정표로 정리해 드려요.</p>
+
+        <form id="plan-form" class="plan-form" autocomplete="off">
+          <div class="search-row">
+            <input
+              id="destination"
+              name="destination"
+              type="text"
+              placeholder="예: 제주도, 오사카, 파리"
+              required
+              maxlength="60"
+            />
+            <button type="submit" class="primary-btn" id="submit-btn">일정 짜기</button>
+          </div>
+
+          <details class="options">
+            <summary>세부 옵션 (선택)</summary>
+            <div class="options-grid">
+              <label>
+                여행 기간
+                <select name="days">
+                  <option value="1">당일치기</option>
+                  <option value="2">1박 2일</option>
+                  <option value="3" selected>2박 3일</option>
+                  <option value="4">3박 4일</option>
+                  <option value="5">4박 5일</option>
+                  <option value="7">6박 7일</option>
+                </select>
+              </label>
+              <label>
+                출발일
+                <input type="date" name="startDate" />
+              </label>
+              <label>
+                동행
+                <select name="companions">
+                  <option value="혼자">혼자</option>
+                  <option value="친구" selected>친구</option>
+                  <option value="연인">연인</option>
+                  <option value="가족(아이 동반)">가족(아이 동반)</option>
+                  <option value="부모님">부모님</option>
+                </select>
+              </label>
+              <label>
+                예산
+                <select name="budget">
+                  <option value="알뜰하게">알뜰하게</option>
+                  <option value="적당하게" selected>적당하게</option>
+                  <option value="여유롭게">여유롭게</option>
+                </select>
+              </label>
+            </div>
+            <fieldset class="styles">
+              <legend>여행 스타일</legend>
+              <label class="chip"><input type="checkbox" name="styles" value="맛집" checked /><span>🍜 맛집</span></label>
+              <label class="chip"><input type="checkbox" name="styles" value="자연·풍경" /><span>🌿 자연·풍경</span></label>
+              <label class="chip"><input type="checkbox" name="styles" value="문화·역사" /><span>🏛 문화·역사</span></label>
+              <label class="chip"><input type="checkbox" name="styles" value="쇼핑" /><span>🛍 쇼핑</span></label>
+              <label class="chip"><input type="checkbox" name="styles" value="액티비티" /><span>🏄 액티비티</span></label>
+              <label class="chip"><input type="checkbox" name="styles" value="카페·휴식" /><span>☕ 카페·휴식</span></label>
+            </fieldset>
+            <label class="full">
+              추가 요청
+              <input type="text" name="notes" maxlength="200" placeholder="예: 렌터카 없이 대중교통으로, 오전엔 여유롭게" />
+            </label>
+          </details>
+        </form>
+
+        <p class="demo-hint">API 키가 없다면 <button type="button" class="link-btn" id="demo-btn">예시 일정 보기</button></p>
+      </section>
+
+      <section id="status" class="status" hidden></section>
+      <section id="result" class="result" hidden></section>
+    </main>
+
+    <footer class="footer">
+      <p>일정은 AI가 생성한 추천이에요. 영업시간·요금은 방문 전에 꼭 확인하세요.</p>
+    </footer>
+
+    <dialog id="settings-dialog" class="dialog">
+      <form method="dialog" id="settings-form">
+        <h2>API 설정</h2>
+        <p class="muted">
+          <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">Claude API 키</a>가 필요해요.
+          키는 이 브라우저(localStorage)에만 저장되고, Anthropic API 외의 곳으로는 전송되지 않아요.
+        </p>
+        <label>
+          API 키
+          <input type="password" name="apiKey" placeholder="sk-ant-..." autocomplete="off" />
+        </label>
+        <label>
+          모델
+          <select name="model">
+            <option value="claude-opus-5-5">Claude Opus 5.5 (고품질)</option>
+            <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (빠름)</option>
+            <option value="claude-haiku-5-5">Claude Haiku 5.5 (가장 저렴)</option>
+          </select>
+        </label>
+        <div class="dialog-actions">
+          <button type="button" class="ghost-btn" id="clear-key-btn">키 삭제</button>
+          <button type="submit" class="primary-btn" value="save">저장</button>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
