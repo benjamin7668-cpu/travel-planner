@@ -97,6 +97,11 @@
         <p class="demo-hint">API 키가 없다면 <button type="button" class="link-btn" id="demo-btn">예시 일정 보기</button></p>
       </section>
 
+      <section id="history" class="history" hidden>
+        <h2>최근 일정</h2>
+        <ul id="history-list" class="history-list"></ul>
+      </section>
+
       <section id="status" class="status" hidden></section>
       <section id="result" class="result" hidden></section>
     </main>
@@ -149,6 +154,8 @@
         <p class="muted">키는 이 브라우저(localStorage)에만 저장되고, 선택한 AI 회사 외의 곳으로는 전송되지 않아요.</p>
         <div class="dialog-actions">
           <button type="button" class="ghost-btn" id="clear-key-btn">키 삭제</button>
+          <span class="spacer"></span>
+          <button type="button" class="ghost-btn" id="close-settings-btn">닫기</button>
           <button type="submit" class="primary-btn" value="save">저장</button>
         </div>
       </form>

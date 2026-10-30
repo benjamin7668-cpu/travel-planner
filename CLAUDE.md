@@ -6,7 +6,8 @@
 
 - `npm run dev`: 개발 서버 (http://localhost:5173)
 - `npm run build`: `dist/`로 빌드. 커밋 전에 반드시 통과 확인
-- 테스트 프레임워크는 없음. 빌드와 브라우저 확인으로 검증
+- 테스트 프레임워크는 없음. 빌드 후 Playwright MCP로 `npm run dev` 화면을 데스크톱(1280px)·모바일(390px)·다크 모드에서 확인
+- 라이브러리 API가 불확실하면 Context7 MCP로 최신 문서를 먼저 확인
 
 ## 구조와 규칙
 
@@ -15,6 +16,7 @@
   - Gemini(`@google/genai`, 기본값, 무료) / Claude(`@anthropic-ai/sdk`, `dangerouslyAllowBrowser`) 두 경로
   - 두 경로 모두 같은 `PLAN_SCHEMA`(JSON Schema)로 구조화 출력을 받음. 스키마를 바꾸면 `src/render.js`와 `src/sample.js`도 같이 맞출 것
   - 사용자 오류 메시지는 `PlannerError`로 한국어로 던짐
+- 최근 일정은 localStorage(`travel-planner:history`)에 최대 10개 저장 (`src/main.js`)
 - API 키는 사용자가 입력해 localStorage(`travel-planner:settings`)에만 저장. 저장소에 키를 절대 넣지 말 것
 - 사용자 입력이나 AI 응답을 HTML에 넣을 때는 반드시 `escapeHtml` 처리
 - 배포: `main`에 push하면 `.github/workflows/deploy.yml`이 자동 배포

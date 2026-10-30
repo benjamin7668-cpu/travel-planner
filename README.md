@@ -11,6 +11,7 @@
 - 🕒 **시간대별 타임라인** — 하루 5~7개 일정, 장소마다 Google 지도 링크
 - 💰 **1인 기준 예상 경비**, 🧭 현지 팁, 🎒 준비물 목록
 - 📋 텍스트 복사 / 🖨 인쇄·PDF 저장
+- 🕘 **최근 일정 10개 자동 저장** — 다시 생성하지 않고 바로 열어보기
 - 👀 API 키 없이 볼 수 있는 **예시 일정(제주도)**
 - 🌙 다크 모드, 📱 모바일 대응
 
@@ -73,7 +74,8 @@ travel-planner/
 ├── public/favicon.svg
 ├── .github/workflows/deploy.yml
 ├── USAGE.md            # 사용자용 사용법
-├── DEVELOPMENT.md      # 개발 환경 세팅 · 작업 흐름
+├── DEVELOPMENT.md      # 개발 환경 세팅 · 작업 흐름 · MCP 사용법
+├── .mcp.json           # Claude Code용 MCP (Playwright, Context7)
 └── CLAUDE.md           # Claude Code용 프로젝트 안내
 ```
 

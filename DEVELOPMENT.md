@@ -41,6 +41,24 @@ git push                # 4) push하면 GitHub Actions가 자동으로 사이트
 ```
 배포 상태는 https://github.com/benjamin7668-cpu/travel-planner/actions 에서 볼 수 있어요. 초록 체크면 1~2분 뒤 사이트에 반영돼요.
 
+## Claude Code + MCP로 개발하기
+
+저장소의 `.mcp.json`에 개발용 MCP 서버 2개가 설정돼 있어요. 둘 다 **API 키가 필요 없어요.**
+
+| MCP | 하는 일 | 이렇게 부탁하면 돼요 |
+|---|---|---|
+| **Playwright** | Claude가 실제 브라우저를 띄워 사이트를 클릭·입력하고 스크린샷으로 확인 | "localhost:5173 띄워서 모바일 화면 깨지는 데 없는지 봐줘" |
+| **Context7** | Gemini·Anthropic SDK, Vite 등의 최신 공식 문서를 찾아 줌 | "context7로 @google/genai 스트리밍 사용법 찾아서 적용해줘" |
+
+1. 프로젝트 폴더에서 `claude` 실행
+2. 처음에 "이 프로젝트의 MCP 서버를 사용할까요?"라고 물으면 승인
+3. `/mcp`를 입력하면 연결 상태를 볼 수 있어요.
+
+> Windows 기준으로 `cmd /c npx ...` 형태로 적혀 있어요. Mac/Linux에서 쓴다면 `.mcp.json`에서 `"command": "npx"`로 바꾸고 args 앞의 `"/c", "npx"`를 지우세요.
+> Playwright가 브라우저를 못 찾으면 `npx playwright install chrome`을 한 번 실행하세요.
+
+**GitHub MCP:** Claude Code의 GitHub 플러그인이 설치돼 있다면 `gh auth login` 후 `/mcp`에서 GitHub 서버를 다시 인증하세요. 그러면 Claude가 Actions 결과나 이슈를 직접 확인할 수 있어요. (공용 PC에서는 로그인 정보가 남으니 하지 마세요.)
+
 ## 코드 구조
 
 ```
@@ -54,6 +72,7 @@ travel-planner/
 │   └── style.css           # 디자인 (라이트/다크 모드, 모바일, 인쇄)
 ├── public/favicon.svg
 ├── .github/workflows/deploy.yml   # main에 push하면 GitHub Pages로 자동 배포
+├── .mcp.json               # Claude Code용 MCP 서버 (Playwright, Context7)
 ├── USAGE.md                # 사용자용 사용법
 └── DEVELOPMENT.md          # 이 문서
 ```
@@ -70,7 +89,7 @@ travel-planner/
 
 ## 다음에 해 볼 만한 것 (아이디어)
 
-- [ ] 만든 일정을 브라우저에 저장해서 다시 보기 (일정 기록 목록)
+- [x] 만든 일정을 브라우저에 저장해서 다시 보기 (최근 일정 10개)
 - [ ] 일정 공유 링크 만들기
 - [ ] 날짜별 날씨 예보 함께 보여 주기
 - [ ] 장소를 지도 위에 핀으로 표시하기

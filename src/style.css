@@ -680,3 +680,91 @@ label.full {
 .provider-fields[hidden] {
   display: none;
 }
+
+/* ---------- 최근 일정 ---------- */
+.history {
+  max-width: 640px;
+  margin: 0 auto 32px;
+}
+
+.history h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.history-list li {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.history-open {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history-open span {
+  color: var(--muted);
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-open small {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.history-open:hover strong {
+  color: var(--accent);
+}
+
+.history-delete {
+  border: 0;
+  border-left: 1px solid var(--line);
+  background: none;
+  color: var(--muted);
+  font-size: 20px;
+  width: 44px;
+  cursor: pointer;
+}
+
+.history-delete:hover {
+  color: var(--danger);
+}
+
+.dialog-actions .spacer {
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .history-open {
+    grid-template-columns: 1fr auto;
+  }
+
+  .history-open span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

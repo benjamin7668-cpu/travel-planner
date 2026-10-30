@@ -4,6 +4,8 @@ import { renderPlan, planToText } from "./render.js";
 import { SAMPLE_DESTINATION, SAMPLE_PLAN } from "./sample.js";
 
 const STORAGE_KEY = "travel-planner:settings";
+const HISTORY_KEY = "travel-planner:history";
+const HISTORY_LIMIT = 10;
 const DEFAULT_SETTINGS = {
   provider: "gemini",
   geminiKey: "",
@@ -17,6 +19,8 @@ const statusEl = document.getElementById("status");
 const resultEl = document.getElementById("result");
 const settingsDialog = document.getElementById("settings-dialog");
 const settingsForm = document.getElementById("settings-form");
+const historyEl = document.getElementById("history");
+const historyList = document.getElementById("history-list");
 
 let currentPlan = null;
 let currentDestination = "";
@@ -84,6 +88,66 @@ function showResult(plan, destination) {
   resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+// ---------- 최근 일정 (이 브라우저에만 저장) ----------
+function loadHistory() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(HISTORY_KEY) ?? "[]");
+    return Array.isArray(saved) ? saved : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(history) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch {
+    // 저장 공간이 없거나 막혀 있으면 기록 없이 계속 동작
+  }
+  renderHistory(history);
+}
+
+function addToHistory(plan, options) {
+  const entry = {
+    id: Date.now().toString(36),
+    destination: options.destination,
+    days: options.days,
+    createdAt: new Date().toISOString(),
+    plan,
+  };
+  saveHistory([entry, ...loadHistory()].slice(0, HISTORY_LIMIT));
+}
+
+function renderHistory(history = loadHistory()) {
+  historyEl.hidden = history.length === 0;
+  historyList.innerHTML = history
+    .map((entry) => {
+      const date = new Date(entry.createdAt).toLocaleDateString("ko-KR", { month: "long", day: "numeric" });
+      return `
+        <li>
+          <button type="button" class="history-open" data-id="${escapeHtml(entry.id)}">
+            <strong>${escapeHtml(entry.destination)}</strong>
+            <span>${escapeHtml(entry.plan.title)}</span>
+            <small>${escapeHtml(date)} 생성</small>
+          </button>
+          <button type="button" class="history-delete" data-id="${escapeHtml(entry.id)}" aria-label="${escapeHtml(entry.destination)} 일정 삭제">×</button>
+        </li>`;
+    })
+    .join("");
+}
+
+historyList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-id]");
+  if (!button) return;
+  const history = loadHistory();
+  if (button.classList.contains("history-delete")) {
+    saveHistory(history.filter((entry) => entry.id !== button.dataset.id));
+    return;
+  }
+  const entry = history.find((item) => item.id === button.dataset.id);
+  if (entry) showResult(entry.plan, entry.destination);
+});
+
 function readForm() {
   const data = new FormData(form);
   return {
@@ -116,6 +180,7 @@ form.addEventListener("submit", async (event) => {
 
   try {
     const plan = await generatePlan(options, sessionSettings);
+    addToHistory(plan, options);
     showResult(plan, options.destination);
   } catch (err) {
     const message = err instanceof PlannerError ? err.message : "알 수 없는 오류가 발생했어요.";
@@ -132,6 +197,7 @@ document.getElementById("demo-btn").addEventListener("click", () => {
 });
 
 document.getElementById("settings-btn").addEventListener("click", openSettings);
+document.getElementById("close-settings-btn").addEventListener("click", () => settingsDialog.close());
 
 settingsForm.provider.addEventListener("change", syncProviderFields);
 
@@ -165,3 +231,5 @@ resultEl.addEventListener("click", async (event) => {
     }
   }
 });
+
+renderHistory();
