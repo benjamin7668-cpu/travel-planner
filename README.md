@@ -2,6 +2,9 @@
 
 여행지만 입력하면 AI(Google Gemini 무료 / Claude)가 **날짜별 동선, 맛집, 예상 경비, 준비물**까지 정리된 여행 일정을 짜주는 웹사이트입니다.
 
+🔗 **사이트:** https://benjamin7668-cpu.github.io/travel-planner/
+📖 **사용법:** [USAGE.md](./USAGE.md) · 🛠 **이어서 개발하기:** [DEVELOPMENT.md](./DEVELOPMENT.md)
+
 ## 주요 기능
 
 - 🗺 **여행지 하나만 입력해도 일정 생성** — 기간·동행·예산·여행 스타일은 선택 옵션
@@ -68,7 +71,10 @@ travel-planner/
 │   ├── sample.js       # 예시 일정 데이터
 │   └── style.css
 ├── public/favicon.svg
-└── .github/workflows/deploy.yml
+├── .github/workflows/deploy.yml
+├── USAGE.md            # 사용자용 사용법
+├── DEVELOPMENT.md      # 개발 환경 세팅 · 작업 흐름
+└── CLAUDE.md           # Claude Code용 프로젝트 안내
 ```
 
 ## 참고
