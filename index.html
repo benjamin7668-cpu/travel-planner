@@ -108,22 +108,45 @@
     <dialog id="settings-dialog" class="dialog">
       <form method="dialog" id="settings-form">
         <h2>API 설정</h2>
-        <p class="muted">
-          <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">Claude API 키</a>가 필요해요.
-          키는 이 브라우저(localStorage)에만 저장되고, Anthropic API 외의 곳으로는 전송되지 않아요.
-        </p>
         <label>
-          API 키
-          <input type="password" name="apiKey" placeholder="sk-ant-..." autocomplete="off" />
-        </label>
-        <label>
-          모델
-          <select name="model">
-            <option value="claude-opus-5-5">Claude Opus 5.5 (고품질)</option>
-            <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (빠름)</option>
-            <option value="claude-haiku-5-5">Claude Haiku 5.5 (가장 저렴)</option>
+          AI 선택
+          <select name="provider">
+            <option value="gemini">Google Gemini (무료)</option>
+            <option value="claude">Anthropic Claude (유료 · 고품질)</option>
           </select>
         </label>
+
+        <div class="provider-fields" data-provider="gemini">
+          <p class="muted">
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>에서
+            Google 계정으로 로그인 → <b>Create API key</b>를 누르면 무료 키를 바로 받을 수 있어요. (카드 등록 불필요)
+          </p>
+          <label>
+            Gemini API 키
+            <input type="password" name="geminiKey" placeholder="AIza..." autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="provider-fields" data-provider="claude">
+          <p class="muted">
+            <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">Claude Console</a>에서
+            크레딧 충전 후 키를 만들 수 있어요.
+          </p>
+          <label>
+            Claude API 키
+            <input type="password" name="claudeKey" placeholder="sk-ant-..." autocomplete="off" />
+          </label>
+          <label>
+            모델
+            <select name="claudeModel">
+              <option value="claude-opus-5-5">Claude Opus 5.5 (고품질)</option>
+              <option value="claude-sonnet-5-5">Claude Sonnet 5.5 (빠름)</option>
+              <option value="claude-haiku-5-5">Claude Haiku 5.5 (가장 저렴)</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="muted">키는 이 브라우저(localStorage)에만 저장되고, 선택한 AI 회사 외의 곳으로는 전송되지 않아요.</p>
         <div class="dialog-actions">
           <button type="button" class="ghost-btn" id="clear-key-btn">키 삭제</button>
           <button type="submit" class="primary-btn" value="save">저장</button>

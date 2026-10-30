@@ -1,5 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-
 // Claude가 반드시 이 형태의 JSON으로 답하도록 강제하는 스키마 (Structured Outputs)
 const PLAN_SCHEMA = {
   type: "object",
@@ -92,11 +90,67 @@ function buildUserPrompt({ destination, days, startDate, companions, budget, sty
 
 export class PlannerError extends Error {}
 
-export async function generatePlan(options, { apiKey, model }) {
-  // 정적 사이트(GitHub Pages)라 서버가 없으므로 브라우저에서 직접 호출합니다.
-  // 키는 사용자 본인 것이 localStorage에만 저장되며, 저장소에는 포함되지 않습니다.
-  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+function parsePlan(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new PlannerError("응답을 해석하지 못했어요. 다시 시도해 주세요.");
+  }
+}
 
+// 정적 사이트(GitHub Pages)라 서버가 없으므로 브라우저에서 직접 호출합니다.
+// 키는 사용자 본인 것이 localStorage에만 저장되며, 저장소에는 포함되지 않습니다.
+export async function generatePlan(options, settings) {
+  return settings.provider === "claude"
+    ? generateWithClaude(options, settings)
+    : generateWithGemini(options, settings);
+}
+
+// ---------- Google Gemini (무료 등급 사용 가능) ----------
+export const GEMINI_MODEL = "gemini-flash-latest";
+
+async function generateWithGemini(options, { geminiKey }) {
+  const { GoogleGenAI, ApiError } = await import("@google/genai");
+  const ai = new GoogleGenAI({ apiKey: geminiKey });
+
+  let response;
+  try {
+    response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: buildUserPrompt(options),
+      config: {
+        systemInstruction: SYSTEM_PROMPT,
+        responseMimeType: "application/json",
+        responseJsonSchema: PLAN_SCHEMA,
+      },
+    });
+  } catch (err) {
+    if (err instanceof ApiError) {
+      if (err.status === 401 || err.status === 403 || /api key/i.test(err.message)) {
+        throw new PlannerError("Gemini API 키가 올바르지 않아요. 설정에서 키를 다시 확인해 주세요.");
+      }
+      if (err.status === 429) {
+        throw new PlannerError("무료 사용량을 잠시 초과했어요. 1분쯤 뒤에 다시 시도해 주세요.");
+      }
+      throw new PlannerError(`Gemini API 오류 (${err.status}): ${err.message}`);
+    }
+    if (err instanceof TypeError) throw new PlannerError("네트워크 연결을 확인해 주세요.");
+    throw err;
+  }
+
+  if (response.promptFeedback?.blockReason) {
+    throw new PlannerError("이 요청은 처리할 수 없어요. 여행지나 요청 내용을 바꿔 보세요.");
+  }
+  if (response.candidates?.[0]?.finishReason === "MAX_TOKENS") {
+    throw new PlannerError("일정이 너무 길어 중간에 끊겼어요. 기간을 줄여서 다시 시도해 주세요.");
+  }
+  return parsePlan(response.text ?? "");
+}
+
+// ---------- Anthropic Claude (유료) ----------
+async function generateWithClaude(options, { claudeKey, claudeModel: model }) {
+  const { default: Anthropic } = await import("@anthropic-ai/sdk");
+  const client = new Anthropic({ apiKey: claudeKey, dangerouslyAllowBrowser: true });
   const request = {
     model,
     max_tokens: 16000,
@@ -148,10 +202,5 @@ export async function generatePlan(options, { apiKey, model }) {
     .filter((block) => block.type === "text")
     .map((block) => block.text)
     .join("");
-
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new PlannerError("응답을 해석하지 못했어요. 다시 시도해 주세요.");
-  }
+  return parsePlan(text);
 }

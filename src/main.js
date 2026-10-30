@@ -4,7 +4,12 @@ import { renderPlan, planToText } from "./render.js";
 import { SAMPLE_DESTINATION, SAMPLE_PLAN } from "./sample.js";
 
 const STORAGE_KEY = "travel-planner:settings";
-const DEFAULT_MODEL = "claude-opus-5-5";
+const DEFAULT_SETTINGS = {
+  provider: "gemini",
+  geminiKey: "",
+  claudeKey: "",
+  claudeModel: "claude-opus-5-5",
+};
 
 const form = document.getElementById("plan-form");
 const submitBtn = document.getElementById("submit-btn");
@@ -20,9 +25,24 @@ let sessionSettings = loadSettings();
 // localStorage는 시크릿 모드 등에서 막힐 수 있어 항상 try/catch로 감쌉니다.
 function loadSettings() {
   try {
-    return { model: DEFAULT_MODEL, ...JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}") };
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
+    // 이전 버전(Claude 전용) 설정 { apiKey, model } 호환
+    if (saved.apiKey && !saved.provider) {
+      return { ...DEFAULT_SETTINGS, provider: "claude", claudeKey: saved.apiKey, claudeModel: saved.model };
+    }
+    return { ...DEFAULT_SETTINGS, ...saved };
   } catch {
-    return { model: DEFAULT_MODEL };
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+
+function activeKey(settings) {
+  return settings.provider === "claude" ? settings.claudeKey : settings.geminiKey;
+}
+
+function syncProviderFields() {
+  for (const el of settingsForm.querySelectorAll(".provider-fields")) {
+    el.hidden = el.dataset.provider !== settingsForm.provider.value;
   }
 }
 
@@ -36,8 +56,10 @@ function saveSettings(settings) {
 }
 
 function openSettings() {
-  settingsForm.apiKey.value = sessionSettings.apiKey ?? "";
-  settingsForm.model.value = sessionSettings.model ?? DEFAULT_MODEL;
+  for (const name of Object.keys(DEFAULT_SETTINGS)) {
+    settingsForm[name].value = sessionSettings[name];
+  }
+  syncProviderFields();
   settingsDialog.showModal();
 }
 
@@ -80,7 +102,7 @@ form.addEventListener("submit", async (event) => {
   const options = readForm();
   if (!options.destination) return;
 
-  if (!sessionSettings.apiKey) {
+  if (!activeKey(sessionSettings)) {
     openSettings();
     return;
   }
@@ -111,18 +133,23 @@ document.getElementById("demo-btn").addEventListener("click", () => {
 
 document.getElementById("settings-btn").addEventListener("click", openSettings);
 
+settingsForm.provider.addEventListener("change", syncProviderFields);
+
 settingsForm.addEventListener("submit", () => {
   saveSettings({
-    apiKey: settingsForm.apiKey.value.trim(),
-    model: settingsForm.model.value,
+    provider: settingsForm.provider.value,
+    geminiKey: settingsForm.geminiKey.value.trim(),
+    claudeKey: settingsForm.claudeKey.value.trim(),
+    claudeModel: settingsForm.claudeModel.value,
   });
   // 키 입력 때문에 멈췄던 요청이 있으면 이어서 진행
-  if (sessionSettings.apiKey && form.destination.value.trim()) form.requestSubmit();
+  if (activeKey(sessionSettings) && form.destination.value.trim()) form.requestSubmit();
 });
 
 document.getElementById("clear-key-btn").addEventListener("click", () => {
-  settingsForm.apiKey.value = "";
-  saveSettings({ ...sessionSettings, apiKey: "" });
+  settingsForm.geminiKey.value = "";
+  settingsForm.claudeKey.value = "";
+  saveSettings({ ...sessionSettings, geminiKey: "", claudeKey: "" });
 });
 
 resultEl.addEventListener("click", async (event) => {

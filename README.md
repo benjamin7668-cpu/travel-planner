@@ -1,6 +1,6 @@
 # ✈ 여행 플래너
 
-여행지만 입력하면 AI(Claude)가 **날짜별 동선, 맛집, 예상 경비, 준비물**까지 정리된 여행 일정을 짜주는 웹사이트입니다.
+여행지만 입력하면 AI(Google Gemini 무료 / Claude)가 **날짜별 동선, 맛집, 예상 경비, 준비물**까지 정리된 여행 일정을 짜주는 웹사이트입니다.
 
 ## 주요 기능
 
@@ -17,7 +17,7 @@
 |---|---|
 | 프론트엔드 | Vanilla JavaScript, HTML, CSS |
 | 빌드 | [Vite](https://vite.dev) |
-| AI | [Claude API](https://platform.claude.com/docs) (`@anthropic-ai/sdk`) — Structured Outputs(JSON Schema)로 일정 형식 고정 |
+| AI | [Gemini API](https://ai.google.dev) (`@google/genai`, 무료 등급) / [Claude API](https://platform.claude.com/docs) (`@anthropic-ai/sdk`) — JSON Schema로 일정 형식 고정 |
 | 배포 | GitHub Pages + GitHub Actions |
 
 ## 동작 방식
@@ -26,16 +26,16 @@
 사용자 입력 (여행지 + 옵션)
       │
       ▼
-src/planner.js ── 프롬프트 + JSON 스키마 ──▶ Claude API
+src/planner.js ── 프롬프트 + JSON 스키마 ──▶ Gemini 또는 Claude API
       │                                        │
       │◀────────── 일정 JSON (스키마 보장) ──────┘
       ▼
 src/render.js ── 타임라인 / 예산 / 팁 카드로 렌더링
 ```
 
-- 서버가 없는 정적 사이트라 **브라우저에서 Claude API를 직접 호출**합니다.
+- 서버가 없는 정적 사이트라 **브라우저에서 AI API를 직접 호출**합니다.
 - API 키는 사용자가 직접 입력하며 **브라우저 localStorage에만 저장**됩니다. 저장소 코드에는 키가 들어가지 않습니다.
-- Opus / Sonnet 모델에서는 서버 측 폴백(`fallbacks: "default"`)을 켜서, 드물게 요청이 거절되면 다른 모델이 자동으로 이어받습니다.
+- Claude Opus / Sonnet 모델에서는 서버 측 폴백(`fallbacks: "default"`)을 켜서, 드물게 요청이 거절되면 다른 모델이 자동으로 이어받습니다.
 
 ## 실행 방법
 
@@ -44,7 +44,9 @@ npm install
 npm run dev      # http://localhost:5173
 ```
 
-1. 우측 상단 **⚙ API 설정**에서 [Claude API 키](https://platform.claude.com/settings/keys)를 입력
+1. 우측 상단 **⚙ API 설정**에서 AI를 고르고 키를 입력
+   - **Gemini (무료)**: [Google AI Studio](https://aistudio.google.com/apikey)에서 Google 계정으로 무료 키 발급 (카드 불필요)
+   - **Claude (유료)**: [Claude Console](https://platform.claude.com/settings/keys)에서 크레딧 충전 후 키 발급
 2. 여행지를 입력하고 **일정 짜기** 클릭
 
 ## GitHub Pages 배포
@@ -61,7 +63,7 @@ travel-planner/
 ├── index.html          # 화면 구조 (입력 폼, 설정 다이얼로그)
 ├── src/
 │   ├── main.js         # 이벤트 처리, 설정 저장
-│   ├── planner.js      # Claude API 호출, 프롬프트, JSON 스키마
+│   ├── planner.js      # Gemini / Claude API 호출, 프롬프트, JSON 스키마
 │   ├── render.js       # 일정 JSON → HTML
 │   ├── sample.js       # 예시 일정 데이터
 │   └── style.css
@@ -72,4 +74,4 @@ travel-planner/
 ## 참고
 
 - AI가 생성한 일정은 추천일 뿐이니 영업시간·요금은 방문 전에 확인하세요.
-- API 사용량에 따라 요금이 부과됩니다 (Haiku 모델이 가장 저렴).
+- Gemini 무료 등급은 분당·일일 요청 횟수 제한이 있습니다. Claude는 사용량만큼 요금이 부과됩니다.
